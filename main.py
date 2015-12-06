@@ -3,22 +3,30 @@ import readGraph
 import nodeCircles
 import operator
 import SI
+import SIsimulation
+import QuarantineGraph
 from collections import Counter
 
-graph=readGraph.read()
+graph, dict =readGraph.read()
 dict=nodeCircles.create_circle_dict(graph)
 
-sorted_dict=sorted(dict.items(),key=operator.itemgetter(1))  ##returns list of sorted dictionary
-sorted_dict_reverse=sorted_dict[::-1]                        ##reverse list
-epicurve=SI.spreadrumour(graph,0.1,100)                      #get spread of rumour
+sorted_dict_reverse=sorted(dict.items(),key=operator.itemgetter(1), reverse = True)  ##returns list of sorted dictionary
 
-bip=nx.get_node_attributes(graph,'bipartite')   #get number of nodes of each class
+epicurve = SIsimulation.spreadrumour(graph,.1,100, 'normalFlow.csv')
+#epicurve=SI.spreadrumour(graph,0.5,3000)                      #get spread of rumour
+nodesToQuarantine = 400;
+quarantinedGraph = QuarantineGraph.quarantine(graph.copy(), sorted_dict_reverse, nodesToQuarantine )
+quarantinedEpicurve = SIsimulation.spreadrumour(quarantinedGraph,.1,100, 'quarantinedFlow.csv')
 
 
-print Counter(bip.values())
-print graph.number_of_edges()
+# bip=nx.get_node_attributes(graph,'bipartite')   #get number of nodes of each class
+#
+#
+# print Counter(bip.values())
+# print graph.number_of_edges()
 print graph.number_of_nodes()
-print nx.get_node_attributes(graph,'bipartite')
-print sorted_dict_reverse
-print epicurve
+
+# print nx.get_node_attributes(graph,'bipartite')
+# print sorted_dict_reverse
+print (epicurve)
 
