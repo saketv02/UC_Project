@@ -27,7 +27,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
 
 
     #Now we're going to set the simulation clock to zero.
-    t = 0
+    t = 1
 
     susceptible = {}
     infected ={}
@@ -78,6 +78,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
 
         #Find the susceptibles
         susceptible={}
+        susceptibleGroupList = {}
         #Find the newly infected groups
         newlyInfectedGroups = {}
         for node in infected:
@@ -85,7 +86,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
                 neighbours = G.neighbors(node)
                 for group in neighbours:
                     if(bip[group] == 1):
-                        if (group not in newlyInfectedGroups) and (group not in infectedGroups) :
+                        if (group not in newlyInfectedGroups) :
                             newlyInfectedGroups[group] = group
                             if group in susceptibleGroupList:
                                 del susceptibleGroupList[group]
@@ -104,7 +105,9 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
 
 
         processingList = {}
+        runCycle = 10;
         #Now we have a susceptibleGroupList.
+
         #Walk through all susceptible groups.
         for susceptibleGroup in susceptibleGroupList: #Guaranteed to be a group
             #Check if only  one unique node out of susceptible and infected is present in the group's members.
@@ -120,32 +123,35 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
                     processingList[onlyMember] = len(G.neighbors(susceptibleGroup)) #This group is guaranteed to have only one susceptible. Add it
             #del susceptibleGroupList[susceptibleGroup]
 
-        #If the processing list is empty, still clear out based on best hunch.
-        if len(processingList) < 1:
-            nodeRemoved = 0
-            for nodeToQuarantine in sorted_dict_reverse:
-                if G.has_node(nodeToQuarantine[0]):
-                    if(nodeToQuarantine[0] in infected):
-                        continue
-                    G.remove_node(nodeToQuarantine[0])
-                    if(nodeToQuarantine[0] in susceptible):
-                        del susceptible[nodeToQuarantine[0]]
-                    if(nodeRemoved >= immunizationBudget):
-                        break
-                    nodeRemoved = nodeRemoved + 1;
 
-        sortedProcessingList = sorted(processingList.items(),key=operator.itemgetter(1), reverse = True)
+        if t % runCycle == 0:
+            print 'Condition satisfied'
+            #If the processing list is empty, still clear out based on best hunch.
+            if len(processingList) < 1:
+                nodeRemoved = 0
+                for nodeToQuarantine in sorted_dict_reverse:
+                    if G.has_node(nodeToQuarantine[0]):
+                        if(nodeToQuarantine[0] in infected):
+                            continue
+                        G.remove_node(nodeToQuarantine[0])
+                        if(nodeToQuarantine[0] in susceptible):
+                            del susceptible[nodeToQuarantine[0]]
+                        if(nodeRemoved >= immunizationBudget):
+                            break
+                        nodeRemoved = nodeRemoved + 1;
 
-        #Remove the 1 most potential lethal node:
-        lethalNodeRemovalCount = 0;
-        for lethalNodes in sortedProcessingList:
-            G.remove_node(lethalNodes[0])
-            if node in susceptible:
-                del susceptible[lethalNodes[0]]
-            print('----------- Removed lethal node --- ', lethalNodes[0] , '. It had degree', lethalNodes[1])
-            lethalNodeRemovalCount = lethalNodeRemovalCount + 1
-            if(lethalNodeRemovalCount >= immunizationBudget):
-                break
+            sortedProcessingList = sorted(processingList.items(),key=operator.itemgetter(1), reverse = True)
+
+            #Remove the 1 most potential lethal node:
+            lethalNodeRemovalCount = 0;
+            for lethalNodes in sortedProcessingList:
+                G.remove_node(lethalNodes[0])
+                if lethalNodes[0] in susceptible:
+                    del susceptible[lethalNodes[0]]
+                print('----------- Removed lethal node --- ', lethalNodes[0] , '. It had degree', lethalNodes[1])
+                lethalNodeRemovalCount = lethalNodeRemovalCount + 1
+                if(lethalNodeRemovalCount >= immunizationBudget):
+                    break
 
         S = len(susceptible)
         I = len(infected)
@@ -183,7 +189,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
         #This prints the time to standard out - usually the terminal you're running from -
         # and increments the timestep.
         t += 1
-        if(t > 20):
+        if(t > 100):
             break
 
 
