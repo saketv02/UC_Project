@@ -65,12 +65,12 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
     susceptibleGroupList = {}
 
     #We begin with the assumption that the seed nodes have contaminated the groups that they are part of.
-    for node in infected:
-            neighbours = G.neighbors(node)
-            for group in neighbours:
-                if(bip[group] == 1):
-                    if (group not in infectedGroups) :
-                        infectedGroups[group] = group
+    # for node in infected:
+    #         neighbours = G.neighbors(node)
+    #         for group in neighbours:
+    #             if(bip[group] == 1):
+    #                 if (group not in infectedGroups) :
+    #                     infectedGroups[group] = group
 
     while I > 0:
         newlyInfected = {}
@@ -81,18 +81,19 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
         #Find the newly infected groups
         newlyInfectedGroups = {}
         for node in infected:
-            neighbours = G.neighbors(node)
-            for group in neighbours:
-                if(bip[group] == 1):
-                    if (group not in newlyInfectedGroups) and (group not in infectedGroups) :
-                        newlyInfectedGroups[group] = group
-                        if group in susceptibleGroupList:
-                            del susceptibleGroupList[group]
+            if G.has_node(node):
+                neighbours = G.neighbors(node)
+                for group in neighbours:
+                    if(bip[group] == 1):
+                        if (group not in newlyInfectedGroups) and (group not in infectedGroups) :
+                            newlyInfectedGroups[group] = group
+                            if group in susceptibleGroupList:
+                                del susceptibleGroupList[group]
 
 
 
         #Get all the NODES ONLY for this group. These members are susceptible to the infection. Add them to the susceptible list.
-        for newlyInfectedGroup in infectedGroups:
+        for newlyInfectedGroup in newlyInfectedGroups:
             for member in G.neighbors(newlyInfectedGroup):
                 if(bip[member] == 0) and (member not in susceptible) and (member not in infected):
                     susceptible[member] = member
@@ -109,7 +110,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
             #Check if only  one unique node out of susceptible and infected is present in the group's members.
             uniqueSusceptibleCount = 0;
             onlyMember = ''
-            for member in G.neighbors(newlyInfectedGroup):
+            for member in G.neighbors(susceptibleGroup):
                 if(bip[member] == 0):
                     if(member in susceptible) and (member not in infected):
                         uniqueSusceptibleCount = uniqueSusceptibleCount + 1
@@ -124,9 +125,9 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
             nodeRemoved = 0
             for nodeToQuarantine in sorted_dict_reverse:
                 if G.has_node(nodeToQuarantine[0]):
-                    G.remove_node(nodeToQuarantine[0])
                     if(nodeToQuarantine[0] in infected):
-                        del infected[nodeToQuarantine[0]]
+                        continue
+                    G.remove_node(nodeToQuarantine[0])
                     if(nodeToQuarantine[0] in susceptible):
                         del susceptible[nodeToQuarantine[0]]
                     if(nodeRemoved >= immunizationBudget):
@@ -182,7 +183,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
         #This prints the time to standard out - usually the terminal you're running from -
         # and increments the timestep.
         t += 1
-        if(t > 50):
+        if(t > 20):
             break
 
 
