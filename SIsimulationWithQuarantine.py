@@ -86,7 +86,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
                 neighbours = G.neighbors(node)
                 for group in neighbours:
                     if(bip[group] == 1):
-                        if (group not in newlyInfectedGroups) and (group not in infectedGroups) :
+                        if (group not in newlyInfectedGroups) :
                             newlyInfectedGroups[group] = group
                             if group in susceptibleGroupList:
                                 del susceptibleGroupList[group]
@@ -146,7 +146,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile):
             lethalNodeRemovalCount = 0;
             for lethalNodes in sortedProcessingList:
                 G.remove_node(lethalNodes[0])
-                if node in susceptible:
+                if lethalNodes[0] in susceptible:
                     del susceptible[lethalNodes[0]]
                 print('----------- Removed lethal node --- ', lethalNodes[0] , '. It had degree', lethalNodes[1])
                 lethalNodeRemovalCount = lethalNodeRemovalCount + 1
