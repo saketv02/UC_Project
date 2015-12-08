@@ -19,7 +19,7 @@ nodesToQuarantine = 400;
 #quarantinedGraph = QuarantineGraph.quarantine(graph.copy(), sorted_dict_reverse, nodesToQuarantine)
 #quarantinedEpicurve = SIsimulation.spreadrumour(quarantinedGraph,.1,100, 'quarantinedFlow.csv')
 
-epicurve = SIsimulationWithQuarantine.spreadrumour(graph,.5,500, sorted_dict_reverse, 'secondDegreeQuarantine.csv')
+epicurve = SIsimulationWithQuarantine.spreadrumour(graph,.1,100, sorted_dict_reverse, 'secondDegreeQuarantine.csv')
 
 # bip=nx.get_node_attributes(graph,'bipartite')   #get number of nodes of each class
 #
