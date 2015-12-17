@@ -128,7 +128,7 @@ def spreadrumour(g,beta,seeds, outputFile):
             break
 
 
-    w = csv.writer(open(outputFile, "w"))
+    w = csv.writer(open(outputFile, "wb"))
     for sus, inf in zip(sList, iList):
         w.writerow([sus, inf])
 

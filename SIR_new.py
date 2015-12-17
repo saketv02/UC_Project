@@ -7,7 +7,7 @@ import csv
 import operator
 
 
-def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
+def spreadrumour(g,beta,gamma,seeds,sorted_dict_reverse, outputFile,runCycle):
 
     #Read the file into a graph
     G = g
@@ -20,7 +20,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
 
     b = beta
 
-    immunizationBudget = 1;
+    immunizationBudget = 1
 
     I = numberOfNodesToInfect #we seed the outbreak with one infectious individual
     S = 0 #this is the number of susceptibles
@@ -32,6 +32,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
     susceptible = {}
     infected ={}
     newlyInfected = []
+    recover={}
 
     print(numberOfNodesToInfect)
 
@@ -47,15 +48,16 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
 
     sList = [] #we'll keep the number of susceptible individuals at each step on this list
     iList = [] #the number of infected individuals here
-    #rList = [] #the number who have recovered here
+    rList = [] #the number who have recovered here
 
     S = len(susceptible)
     I = len(infected)
+    R=len(recover)
 
 
     sList.append(S)
     iList.append(I)
-    #rList.append(R)
+    rList.append(R)
 
     print(infected)
     print(S)
@@ -96,7 +98,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
         #Get all the NODES ONLY for this group. These members are susceptible to the infection. Add them to the susceptible list.
         for newlyInfectedGroup in newlyInfectedGroups:
             for member in G.neighbors(newlyInfectedGroup):
-                if(bip[member] == 0) and (member not in susceptible) and (member not in infected):
+                if(bip[member] == 0) and (member not in susceptible) and (member not in infected) and (member not in recover):
                     susceptible[member] = member
                     #Find the groups this particular node is part of, and add it to the susceptible group list.
                     for group in G.neighbors(member):
@@ -115,7 +117,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
             onlyMember = ''
             for member in G.neighbors(susceptibleGroup):
                 if(bip[member] == 0):
-                    if(member in susceptible) and (member not in infected):
+                    if(member in susceptible):
                         uniqueSusceptibleCount = uniqueSusceptibleCount + 1
                         onlyMember = member
             if  uniqueSusceptibleCount <= 1:
@@ -133,9 +135,12 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
                     if G.has_node(nodeToQuarantine[0]):
                         if(nodeToQuarantine[0] in infected):
                             continue
-                        G.remove_node(nodeToQuarantine[0])
+                        #changed
+                        recover[nodeToQuarantine[0]]=nodeToQuarantine[0]
                         if(nodeToQuarantine[0] in susceptible):
                             del susceptible[nodeToQuarantine[0]]
+                        if (nodeToQuarantine[0] in infected):
+                            del infected[nodeToQuarantine[0]]
                         if(nodeRemoved >= immunizationBudget):
                             break
                         nodeRemoved = nodeRemoved + 1;
@@ -143,11 +148,14 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
             sortedProcessingList = sorted(processingList.items(),key=operator.itemgetter(1), reverse = True)
 
             #Remove the 1 most potential lethal node:
-            lethalNodeRemovalCount = 0;
+            lethalNodeRemovalCount = 0
             for lethalNodes in sortedProcessingList:
-                G.remove_node(lethalNodes[0])
+                #G.remove_node(lethalNodes[0])
+                recover[lethalNodes[0]]=lethalNodes[0]
                 if lethalNodes[0] in susceptible:
-                    del susceptible[lethalNodes[0]]
+                   del susceptible[lethalNodes[0]]
+                if lethalNodes[0] in infected:
+                    del infected[lethalNodes[0]]
                 print('----------- Removed lethal node --- ', lethalNodes[0] , '. It had degree', lethalNodes[1])
                 lethalNodeRemovalCount = lethalNodeRemovalCount + 1
                 if(lethalNodeRemovalCount >= immunizationBudget):
@@ -155,19 +163,55 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
 
         S = len(susceptible)
         I = len(infected)
+        R=len(recover)
 
         print('------------------------Start with new susceptibles - Begin ---------------')
         print(S)
         print(I)
+        print(R)
         print('------------------------Start with new susceptibles - - End---------------')
 
         #NEW PEOPLE ARE GETTING INFECTED
         newlyInfected = {}
         infected_num= int(round(b*len(susceptible)))
+        recover_num=int(round(gamma*len(recover)))
+
+        #create potential recovery candidates
+        newlyrecoverGroups = {}
+        recoverNodes={}
+        for node in recover:
+            if G.has_node(node):
+                neighbours = G.neighbors(node)
+                for group in neighbours:
+                    if(bip[group] == 1):
+                        if (group not in newlyrecoverGroups) :
+                            newlyrecoverGroups[group] = group
+
+
+
+        #Get all the NODES ONLY for this group. These members are susceptible to the infection. Add them to the susceptible list.
+        for newlyrecoverGroup in newlyrecoverGroups:
+            for member in G.neighbors(newlyrecoverGroup):
+                if(bip[member] == 0):
+                    recoverNodes[member] = member
+
+
+        for i in range(0,recover_num):
+            node=random.sample(recoverNodes,1)
+            recover[node[0]] = node[0]
+            if node[0] in susceptible:
+                del susceptible[node[0]]
+            if node[0] in infected:
+                del infected[node[0]]
+
+
+
+
         for i in range(0,infected_num):
             node=random.sample(susceptible,1)
             newlyInfected[node[0]] = node[0]
             del susceptible[node[0]]
+
 
 
         for i in newlyInfected:
@@ -178,11 +222,13 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
 
         S = len(susceptible)
         I = len(infected)
-        #R = len(immune)
+
+        R = len(recover)
 
         #Then we add these values to their respective lists
         sList.append(S)
         iList.append(I)
+        rList.append(R)
         #rList.append(R)
 
 
@@ -194,6 +240,6 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
 
 
     w = csv.writer(open(outputFile,'wb'))
-    for sus, inf in zip(sList, iList):
-        w.writerow([sus, inf])
+    for sus, inf, rec in zip(sList, iList, rList):
+        w.writerow([sus, inf, rec])
 
