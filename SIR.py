@@ -7,7 +7,7 @@ import csv
 import operator
 
 
-def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
+def spreadrumour(g,beta,gamma,seeds,sorted_dict_reverse, outputFile,runCycle,case):
 
     #Read the file into a graph
     G = g
@@ -32,6 +32,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
     susceptible = {}
     infected ={}
     newlyInfected = []
+    recover={}
 
     print(numberOfNodesToInfect)
 
@@ -96,7 +97,7 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
         #Get all the NODES ONLY for this group. These members are susceptible to the infection. Add them to the susceptible list.
         for newlyInfectedGroup in newlyInfectedGroups:
             for member in G.neighbors(newlyInfectedGroup):
-                if(bip[member] == 0) and (member not in susceptible) and (member not in infected):
+                if(bip[member] == 0) and (member not in susceptible) and (member not in infected) and (member not in recover):
                     susceptible[member] = member
                     #Find the groups this particular node is part of, and add it to the susceptible group list.
                     for group in G.neighbors(member):
@@ -153,6 +154,15 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
                 if(lethalNodeRemovalCount >= immunizationBudget):
                     break
 
+            #find the best infected node to select as a seed.
+            if case==1:
+                #inform nodes with most circles
+
+            else if case ==2:
+                #inform infected nodes with most circles.
+
+
+
         S = len(susceptible)
         I = len(infected)
 
@@ -164,6 +174,16 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
         #NEW PEOPLE ARE GETTING INFECTED
         newlyInfected = {}
         infected_num= int(round(b*len(susceptible)))
+        recover_num=int(round(gamma*len(infected)))
+
+        if t>1:
+            for i in range(0,infected_num):
+                node=random.sample(infected,1)
+                recover[node[0]]=node[0]
+                del infected[]
+
+
+
         for i in range(0,infected_num):
             node=random.sample(susceptible,1)
             newlyInfected[node[0]] = node[0]
@@ -175,6 +195,8 @@ def spreadrumour(g,beta,seeds,sorted_dict_reverse, outputFile,runCycle):
 
         for newlyInfectedGroup in newlyInfectedGroups:
             infectedGroups[newlyInfectedGroup] = newlyInfectedGroup
+
+
 
         S = len(susceptible)
         I = len(infected)

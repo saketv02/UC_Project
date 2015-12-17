@@ -5,6 +5,7 @@ import operator
 import SI
 import SIsimulation
 import QuarantineGraph
+import SIR_new
 import SIsimulationWithQuarantine
 from collections import Counter
 
@@ -15,20 +16,20 @@ sorted_dict_reverse=sorted(dict.items(),key=operator.itemgetter(1), reverse = Tr
 
 #epicurve = SIsimulation.spreadrumour(graph,.1,100, 'normalFlow.csv')
 #epicurve=SI.spreadrumour(graph,0.5,3000)                      #get spread of rumour
-nodesToQuarantine = 400;
+nodesToQuarantine = 100;
 #quarantinedGraph = QuarantineGraph.quarantine(graph.copy(), sorted_dict_reverse, nodesToQuarantine)
-#quarantinedEpicurve = SIsimulation.spreadrumour(quarantinedGraph,.1,100, 'quarantinedFlow.csv')
+#quarantinedEpicurve = SIsimulation.spreadrumour(quarantinedGraph,.1,10, 'quarantinedFlow.csv')
 
-epicurve = SIsimulationWithQuarantine.spreadrumour(graph,.1,100, sorted_dict_reverse, 'secondDegreeQuarantine.csv')
+epicurve = SIR_new.spreadrumour(graph,.1,0.2,10, sorted_dict_reverse, 'recover10.csv',10)
 
 # bip=nx.get_node_attributes(graph,'bipartite')   #get number of nodes of each class
 #
 #
 # print Counter(bip.values())
 # print graph.number_of_edges()
-print graph.number_of_nodes()
+#print graph.number_of_nodes()
 
 # print nx.get_node_attributes(graph,'bipartite')
 # print sorted_dict_reverse
-print (epicurve)
+#print (epicurve)
 

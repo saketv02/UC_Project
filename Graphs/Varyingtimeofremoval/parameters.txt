@@ -1,0 +1,2 @@
+beta 0.1
+seeds 10
